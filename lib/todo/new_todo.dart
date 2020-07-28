@@ -81,6 +81,7 @@ class _NewToDoState extends State<NewToDo> {
       FirebaseAuth.instance.currentUser().then((user) {
         Firestore.instance.collection("todos").document().setData({
           "body": _todoController.text,
+          "done" : false,
           "user_id": user.uid
         }).then((_) {
           Navigator.of(context).pop();

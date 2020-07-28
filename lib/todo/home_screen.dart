@@ -27,9 +27,9 @@ class _HomeScreenState extends State<HomeScreen> {
 
   Widget _content(BuildContext context) {
     return Padding(
-      padding: EdgeInsets.all(36),
+      padding: EdgeInsets.all(24),
       child: StreamBuilder(
-          stream: Firestore.instance.collection("todos").snapshots(),
+          stream: Firestore.instance.collection("todos").orderBy("done").snapshots(),
           builder: (BuildContext context, AsyncSnapshot snapshot) {
             switch (snapshot.connectionState) {
               case ConnectionState.none:
@@ -71,8 +71,25 @@ class _HomeScreenState extends State<HomeScreen> {
     return ListView.builder(
       itemCount: data.documents.length,
         itemBuilder: (BuildContext context , int position){
-        return ListTile(
-          title: Text(data.documents[position]["body"]),
+        return Card(
+          child: ListTile(
+            title: Text(data.documents[position]["body"],
+              style: TextStyle(
+                decoration: data.documents[position]["done"]? TextDecoration.lineThrough : TextDecoration.none
+              ),
+            ),
+            trailing: IconButton(icon: Icon(Icons.delete,color: Colors.red.shade300,),
+                onPressed: (){ Firestore.instance.collection("todos").
+                document(data.documents[position].documentID).delete(); }),
+            leading: IconButton(icon: Icon(Icons.assignment_turned_in,
+              color: data.documents[position]["done"] ? Colors.teal : Colors.grey.shade300,
+
+            ),
+                onPressed: (){
+              Firestore.instance.collection("todos").
+              document(data.documents[position].documentID).updateData({"done":true});
+            }),
+          ),
         );
 
         },
