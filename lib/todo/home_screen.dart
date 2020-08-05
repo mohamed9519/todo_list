@@ -100,7 +100,7 @@ class _HomeScreenState extends State<HomeScreen> {
   }
   Widget _base(BuildContext context){
     return StreamBuilder(
-        stream: Firestore.instance.collection("todos").where("user_id" , isEqualTo: _User.uid).snapshots(),
+        stream: Firestore.instance.collection("todos").where("user_id" , isEqualTo: _User.uid).orderBy("done").snapshots(),
         builder: (BuildContext context, AsyncSnapshot snapshot) {
           switch (snapshot.connectionState) {
             case ConnectionState.none:
