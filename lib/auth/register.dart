@@ -1,5 +1,6 @@
 import 'package:ToDo/auth/login.dart';
 import 'package:ToDo/todo/home_screen.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
@@ -12,6 +13,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
   TextEditingController _emailController = TextEditingController();
   TextEditingController _passwordController = TextEditingController();
   TextEditingController _confirmpasswordController= TextEditingController();
+  TextEditingController _nameController = TextEditingController();
 
   final _formKey = GlobalKey<FormState>();
   bool _autoValidation = false;
@@ -47,6 +49,19 @@ class _RegisterScreenState extends State<RegisterScreen> {
           key: _formKey,
           child: Column(
             children: <Widget>[
+              TextFormField(
+                controller: _nameController,
+                decoration: InputDecoration(
+                    hintText: "Name"
+                ),
+                validator: (value) {
+                  if (value.isEmpty) {
+                    return 'Name is required';
+                  }
+                  return null;
+                },
+              ),
+              SizedBox(height: 24,),
               TextFormField(
                 controller: _emailController,
                 decoration: InputDecoration(
@@ -136,16 +151,32 @@ class _RegisterScreenState extends State<RegisterScreen> {
         _isLoading = true;
         _autoValidation=false;
       });
-      AuthResult results =
-     await FirebaseAuth.instance.createUserWithEmailAndPassword(email: _emailController.text,
-         password: _passwordController.text);
-      if(results.user==null){
-        _isLoading= false;
-        _error="Register is failed";
 
-      }else{
-        Navigator.of(context).pushReplacement(MaterialPageRoute(builder: (context)=>HomeScreen()));
-      }
+      FirebaseAuth.
+      instance.
+      createUserWithEmailAndPassword(email: _emailController.text, password: _passwordController.text)
+      .then((authResult){
+        Firestore.instance.collection("porfile").document().setData({
+          "name" : _nameController.text,
+          "user_id" : authResult.user.uid
+        }).then((_){
+          Navigator.of(context).pushReplacement(MaterialPageRoute(builder: (context)=>HomeScreen()));
+        }).catchError((error){
+          setState(() {
+            _isLoading= false;
+            _error=error.toString();
+          });
+        });
+
+      })
+      .catchError((error){
+        setState(() {
+          _isLoading= false;
+          _error=error.toString();
+        });
+      });
+
+
     }
   }
 
