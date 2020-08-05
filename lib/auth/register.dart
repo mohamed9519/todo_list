@@ -12,16 +12,13 @@ class RegisterScreen extends StatefulWidget {
 class _RegisterScreenState extends State<RegisterScreen> {
   TextEditingController _emailController = TextEditingController();
   TextEditingController _passwordController = TextEditingController();
-  TextEditingController _confirmpasswordController= TextEditingController();
+  TextEditingController _confirmpasswordController = TextEditingController();
   TextEditingController _nameController = TextEditingController();
 
   final _formKey = GlobalKey<FormState>();
   bool _autoValidation = false;
   bool _isLoading = false;
-  String _error ;
-
-
-
+  String _error;
 
   @override
   void dispose() {
@@ -38,12 +35,14 @@ class _RegisterScreenState extends State<RegisterScreen> {
         centerTitle: true,
         title: Text("Create New Account"),
       ),
-      body: _isLoading ? _Loading(context) : _form(context) ,
+      body: _isLoading ? _Loading(context) : _form(context),
     );
   }
-  Widget _form(BuildContext context){
+
+  Widget _form(BuildContext context) {
     return SingleChildScrollView(
-      child: Padding(padding: EdgeInsets.all(36),
+      child: Padding(
+        padding: EdgeInsets.all(36),
         child: Form(
           autovalidate: _autoValidation,
           key: _formKey,
@@ -51,9 +50,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
             children: <Widget>[
               TextFormField(
                 controller: _nameController,
-                decoration: InputDecoration(
-                    hintText: "Name"
-                ),
+                decoration: InputDecoration(hintText: "Name"),
                 validator: (value) {
                   if (value.isEmpty) {
                     return 'Name is required';
@@ -61,12 +58,12 @@ class _RegisterScreenState extends State<RegisterScreen> {
                   return null;
                 },
               ),
-              SizedBox(height: 24,),
+              SizedBox(
+                height: 24,
+              ),
               TextFormField(
                 controller: _emailController,
-                decoration: InputDecoration(
-                    hintText: "Email"
-                ),
+                decoration: InputDecoration(hintText: "Email"),
                 validator: (value) {
                   if (value.isEmpty) {
                     return 'Email is required';
@@ -74,120 +71,123 @@ class _RegisterScreenState extends State<RegisterScreen> {
                   return null;
                 },
               ),
-              SizedBox(height: 24,),
+              SizedBox(
+                height: 24,
+              ),
               TextFormField(
                 obscureText: true,
                 controller: _passwordController,
-                decoration: InputDecoration(
-                    hintText: "Password"
-                ),
+                decoration: InputDecoration(hintText: "Password"),
                 validator: (value) {
                   if (value.isEmpty) {
                     return 'Password is required';
-                  }else if(value.length<5){
-                    return"Pasword must be more than 5 charcters";
-
+                  } else if (value.length < 5) {
+                    return "Pasword must be more than 5 charcters";
                   }
                   return null;
                 },
               ),
-              SizedBox(height: 24,),
+              SizedBox(
+                height: 24,
+              ),
               TextFormField(
                 obscureText: true,
                 controller: _confirmpasswordController,
-                decoration: InputDecoration(
-                    hintText: "Confirm password"
-                ),
+                decoration: InputDecoration(hintText: "Confirm password"),
                 validator: (value) {
                   if (value.isEmpty) {
                     return 'Confirmation password is required';
-                  }else if(_passwordController.text!=_confirmpasswordController.text){
-                    return"password is not matched";
+                  } else if (_passwordController.text !=
+                      _confirmpasswordController.text) {
+                    return "password is not matched";
                   }
                   return null;
                 },
-
               ),
-              SizedBox(height: 36,),
+              SizedBox(
+                height: 36,
+              ),
               Container(
                 width: double.infinity,
-                child: RaisedButton(onPressed: _onClickRegister,
+                child: RaisedButton(
+                  onPressed: _onClickRegister,
                   child: Text("Register"),
                 ),
               ),
-              SizedBox(height: 24,),
+              SizedBox(
+                height: 24,
+              ),
               _errorMessage(context),
               Row(
                 children: <Widget>[
                   Text("Have a account ?"),
-                  FlatButton(onPressed: (){
-                    Navigator.of(context).pushReplacement(MaterialPageRoute(builder: (context)=>LoginScreen()));
-                  },
+                  FlatButton(
+                      onPressed: () {
+                        Navigator.of(context).pushReplacement(MaterialPageRoute(
+                            builder: (context) => LoginScreen()));
+                      },
                       child: Text("Login"))
                 ],
               )
             ],
           ),
         ),
-
       ),
     );
-
   }
-  Widget _Loading(BuildContext context){
+
+  Widget _Loading(BuildContext context) {
     return Center(
       child: CircularProgressIndicator(),
     );
   }
 
-
-  void _onClickRegister() async{
+  void _onClickRegister() async {
     if (!_formKey.currentState.validate()) {
       setState(() {
-        _autoValidation=true;
+        _autoValidation = true;
       });
-    }else{
+    } else {
       setState(() {
         _isLoading = true;
-        _autoValidation=false;
+        _autoValidation = false;
       });
 
-      FirebaseAuth.
-      instance.
-      createUserWithEmailAndPassword(email: _emailController.text, password: _passwordController.text)
-      .then((authResult){
+      FirebaseAuth.instance
+          .createUserWithEmailAndPassword(
+              email: _emailController.text, password: _passwordController.text)
+          .then((authResult) {
         Firestore.instance.collection("porfile").document().setData({
-          "name" : _nameController.text,
-          "user_id" : authResult.user.uid
-        }).then((_){
-          Navigator.of(context).pushReplacement(MaterialPageRoute(builder: (context)=>HomeScreen()));
-        }).catchError((error){
+          "name": _nameController.text,
+          "user_id": authResult.user.uid
+        }).then((_) {
+          Navigator.of(context).pushReplacement(
+              MaterialPageRoute(builder: (context) => HomeScreen()));
+        }).catchError((error) {
           setState(() {
-            _isLoading= false;
-            _error=error.toString();
+            _isLoading = false;
+            _error = error.toString();
           });
         });
-
-      })
-      .catchError((error){
+      }).catchError((error) {
         setState(() {
-          _isLoading= false;
-          _error=error.toString();
+          _isLoading = false;
+          _error = error.toString();
         });
       });
-
-
     }
   }
 
-  Widget _errorMessage(BuildContext context){
-    if(_error==null){
+  Widget _errorMessage(BuildContext context) {
+    if (_error == null) {
       return Container();
-    }else{
+    } else {
       return Container(
-        child: Text(_error, style: TextStyle(color: Colors.red),),
+        child: Text(
+          _error,
+          style: TextStyle(color: Colors.red),
+        ),
       );
     }
-
   }
 }
